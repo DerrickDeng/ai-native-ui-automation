@@ -56,14 +56,14 @@ committed Markdown if that fails.
 
 ## Verified local evidence
 
-The following checks passed on 2026-09-19:
+The following checks passed on 2026-10-06:
 
 | Check                                                                           | Result     | What it establishes                                            |
 | ------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------- |
 | `npm run lint`                                                                  | Pass       | TypeScript and repository lint rules hold                      |
 | `npm run bddgen`                                                                | Pass       | Bound Gherkin compiles to generated tests                      |
 | `node --test src/config/framework/__tests__/profile-tags/profile-tags.test.mjs` | 8/8 pass   | Exact profile-tag applicability and selection behavior         |
-| `npm run test:skills`                                                           | 41/41 pass | Hermetic fixture E2E, framework contracts, and Skill contracts |
+| `npm run test:skills`                                                           | 42/42 pass | Hermetic fixture E2E, framework contracts, and Skill contracts |
 
 Deterministic checks prove the workflow mechanics and guardrails; they do not
 by themselves prove stable behavior from every model or every live application.
@@ -74,6 +74,7 @@ They must not be read as a universal self-healing or autonomous testing claim.
 - [Run the two local workflow demos](docs/demo/README.md) without a company
   application, account, or network environment.
 - [Read the Agent and Skill evaluation methodology](docs/evaluation/methodology.md).
+- [Read the evaluation results](docs/evaluation/results.md).
 
 ## Quick Start
 
