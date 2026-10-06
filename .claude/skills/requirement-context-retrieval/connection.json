@@ -1,5 +1,5 @@
 {
-  "requirements_root": "../../../../requirement_testcase_agent",
+  "requirements_root": "../../../../ai-native-test-design",
   "openviking_cli": "wiki/tools/ov.sh",
   "openviking_start": "wiki/tools/start.sh",
   "resource_root_uri": "viking://resources",

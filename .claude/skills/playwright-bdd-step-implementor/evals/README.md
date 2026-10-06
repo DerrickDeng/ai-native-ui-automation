@@ -100,7 +100,7 @@ checked against its source, and named in the handoff. It needs three things on t
   have an untracked `requirement-context-retrieval/`.
 - The OpenViking service may be up or down. The Skill starts it once if it is
   down, so either state is a valid start. Check only that the login store
-  exists (`../requirement_testcase_agent/wiki/.local/codex_auth.json`); without
+  exists (`../ai-native-test-design/wiki/.local/codex_auth.json`); without
   it the start fails and the run falls back to Markdown. After the round, stop
   a service the executor started. If the start fails with "port 19331 is
   already in use", an older `vikingbot` from a past server run is still bound
