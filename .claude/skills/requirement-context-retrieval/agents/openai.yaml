@@ -1,0 +1,4 @@
+interface:
+  display_name: "Requirement Context Retrieval"
+  short_description: "Search a requirements Wiki and verify its cited sources"
+  default_prompt: "Use $requirement-context-retrieval to resolve this business question from the relevant Wiki and original Story or note."

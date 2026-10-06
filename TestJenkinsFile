@@ -1,0 +1,84 @@
+// Test-execution job, not a merge gate (CodeRules R-9): it runs one profile,
+// publishes the reports, and marks the build UNSTABLE when a test fails.
+
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'Region', choices: ['hk', 'sg', 'tw'], description: 'Profile region')
+        choice(name: 'ExecuteEnv', choices: ['sit', 'uat'], description: 'Profile environment')
+        booleanParam(name: 'STEP_SCREENSHOTS', defaultValue: false, description: 'Attach a screenshot after every step')
+    }
+
+    tools {
+        nodejs 'Node20'
+    }
+
+    environment {
+        CI = 'true'
+        // Decrypts encrypted test data (src/utils/encryption.ts); never stored in the repository.
+        TEST_DATA_KEY = credentials('test-data-key')
+        QA_DASHBOARD_URL = "${env.QA_DASHBOARD_URL ?: ''}"
+    }
+
+    options {
+        timeout(time: 2, unit: 'HOURS')
+        disableConcurrentBuilds()
+        timestamps()
+    }
+
+    stages {
+        stage('Install') {
+            steps {
+                sh '''
+                  node --version
+                  google-chrome --version
+                  npm ci
+                '''
+            }
+        }
+
+        stage('Test Execution') {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh "STEP_SCREENSHOTS=${params.STEP_SCREENSHOTS ? '1' : '0'} npm test -- --project=${params.Region}-${params.ExecuteEnv}"
+                }
+            }
+        }
+
+        stage('Report Uploading') {
+            steps {
+                publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true,
+                                     reportDir: 'reports/playwright-html', reportFiles: 'index.html',
+                                     reportName: 'Playwright Test Report'])
+                publishHTML(target: [allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
+                                     reportDir: 'reports/cucumber', reportFiles: 'index.html',
+                                     reportName: 'Cucumber Report'])
+
+                // Optional: push the run to the QA Dashboard. A failed push never fails the build.
+                script {
+                    if (env.QA_DASHBOARD_URL) {
+                        withCredentials([string(credentialsId: 'qa-dashboard-ingest-token', variable: 'QA_INGEST_TOKEN')]) {
+                            try {
+                                sh """
+                                  cd reports && zip -qr playwright-html.zip playwright-html && cd ..
+                                  curl -fsS -X POST "${env.QA_DASHBOARD_URL}/api/v1/ingest/playwright" \\
+                                    -H "Authorization: Bearer \$QA_INGEST_TOKEN" \\
+                                    -F "report=@reports/playwright-html/index.html;type=text/html" \\
+                                    -F "bundle=@reports/playwright-html.zip;type=application/zip" \\
+                                    -F "application_code=QAD" \\
+                                    -F "job_name=${env.JOB_NAME}" \\
+                                    -F "build_number=${env.BUILD_NUMBER}" \\
+                                    -F "commit_sha=${env.GIT_COMMIT ?: ''}" \\
+                                    -F "ci_url=${env.BUILD_URL}"
+                                """
+                            } catch (e) {
+                                echo "Push to QA Dashboard failed: ${e}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

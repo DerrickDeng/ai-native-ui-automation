@@ -1,0 +1,32 @@
+{
+  "hk": {
+    "sit": {
+      "groceries": "Buy groceries",
+      "releaseReport": "Send the HK SIT release report"
+    },
+    "uat": {
+      "groceries": "Buy groceries",
+      "releaseReport": "Send the HK UAT release report"
+    }
+  },
+  "sg": {
+    "sit": {
+      "groceries": "Buy groceries",
+      "releaseReport": "Send the SG SIT release report"
+    },
+    "uat": {
+      "groceries": "Buy groceries",
+      "releaseReport": "Send the SG UAT release report"
+    }
+  },
+  "tw": {
+    "sit": {
+      "groceries": "Buy groceries",
+      "releaseReport": "Send the TW SIT release report"
+    },
+    "uat": {
+      "groceries": "Buy groceries",
+      "releaseReport": "Send the TW UAT release report"
+    }
+  }
+}

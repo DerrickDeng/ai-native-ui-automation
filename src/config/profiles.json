@@ -1,0 +1,40 @@
+{
+  "profiles": {
+    "hk-sit": {
+      "urls": {
+        "qaDashboard": "http://127.0.0.1:5174",
+        "todoMvc": "https://demo.playwright.dev/todomvc"
+      }
+    },
+    "hk-uat": {
+      "urls": {
+        "qaDashboard": "http://127.0.0.1:5174",
+        "todoMvc": "https://demo.playwright.dev/todomvc"
+      }
+    },
+    "sg-sit": {
+      "urls": {
+        "qaDashboard": "http://127.0.0.1:5174",
+        "todoMvc": "https://demo.playwright.dev/todomvc"
+      }
+    },
+    "sg-uat": {
+      "urls": {
+        "qaDashboard": "http://127.0.0.1:5174",
+        "todoMvc": "https://demo.playwright.dev/todomvc"
+      }
+    },
+    "tw-sit": {
+      "urls": {
+        "qaDashboard": "http://127.0.0.1:5174",
+        "todoMvc": "https://demo.playwright.dev/todomvc"
+      }
+    },
+    "tw-uat": {
+      "urls": {
+        "qaDashboard": "http://127.0.0.1:5174",
+        "todoMvc": "https://demo.playwright.dev/todomvc"
+      }
+    }
+  }
+}

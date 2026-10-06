@@ -1,0 +1,46 @@
+node_modules/
+test-results/
+reports/
+playwright-report/
+blob-report/
+tests/.features-gen/
+src/config/framework/__tests__/profile-tags/.features-gen/
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.playwright-mcp/
+.playwright-cli
+# Keep internal archives and working notes out of Git. Version only the
+# public documentation below; do not broadly re-include docs/.
+/docs/*
+!/docs/demo/
+!/docs/demo/README.md
+!/docs/evaluation/
+!/docs/evaluation/methodology.md
+
+# skill smoke suite: disposable run copies
+.claude/skills/playwright-bdd-step-implementor/smoke/.runs/
+.claude/skills/playwright-bdd-step-implementor/smoke/fixture-project/tests/
+.claude/skills/playwright-bdd-step-implementor/smoke/fixture-project/test-results/
+.claude/skills/playwright-bdd-step-implementor/smoke/fixture-project/.journal.log
+
+# skill evaluations: Skill Creator workspaces and golden-task stage markers
+.claude/skills/*-workspace/
+.claude/skills/playwright-bdd-step-implementor/evals/.staged-*
+
+# Local key for encrypted test data
+.test-data-key
+
+# Claude Code local state
+**/.claude/scheduled_tasks.lock
+**/.claude/scheduled_tasks.json
+**/.claude/routines/.state/
+**/.claude/worktrees/
+**/.claude/checkpoints/
+**/.claude/mailbox/
+**/.claude/agent-registry.json
+**/.claude/agent-memory-local
+**/.claude/first-run
+**/.claude/assistant-daemon-state.json

@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Playwright-BDD Test Healer'
+  short_description: 'Diagnose and repair bound BDD test regressions'
+  default_prompt: 'Use $playwright-bdd-test-healer to diagnose and repair this failing scenario without weakening its specification.'

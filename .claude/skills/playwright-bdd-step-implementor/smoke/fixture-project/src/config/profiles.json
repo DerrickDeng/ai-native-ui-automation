@@ -1,0 +1,13 @@
+{
+  "_readme": [
+    "Mirror of the main project's src/config/profiles.json: values live here, the",
+    "field list is ComboConfig in profile.ts. The fixture only varies a greeting."
+  ],
+
+  "combos": {
+    "hk-sit": { "greeting": "Hello SIT" },
+    "sg-sit": { "greeting": "Hello SIT" },
+    "hk-uat": { "greeting": "Hello UAT" },
+    "sg-uat": { "greeting": "Hello UAT" }
+  }
+}

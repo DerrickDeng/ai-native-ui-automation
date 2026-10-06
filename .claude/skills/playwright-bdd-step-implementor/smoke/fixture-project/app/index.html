@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture App</title>
+  </head>
+  <body>
+    <h1>Fixture App</h1>
+
+    <button id="reveal" onclick="document.getElementById('secret').hidden = false">Reveal</button>
+    <p id="secret" data-testid="secret" hidden>revealed-content</p>
+
+    <nav>
+      <button class="tab" data-tab="Alpha" onclick="activate(this)">Alpha</button>
+      <button class="tab" data-tab="Beta" onclick="activate(this)">Beta</button>
+      <button class="tab" data-tab="Gamma" onclick="activate(this)">Gamma</button>
+    </nav>
+    <p id="active-tab" data-testid="active-tab">none</p>
+
+    <script>
+      function activate(el) {
+        document.getElementById('active-tab').textContent = el.dataset.tab;
+      }
+    </script>
+  </body>
+</html>

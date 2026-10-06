@@ -1,0 +1,4 @@
+# Copied verbatim from Playwright; keep them identical to upstream so a
+# reinstall shows only real changes. See CLAUDE.md "Skills and references".
+.claude/skills/playwright-cli/
+.claude/skills/playwright-trace/

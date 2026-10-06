@@ -1,0 +1,7 @@
+{
+  "requirements_root": "../../../../requirement_testcase_agent",
+  "openviking_cli": "wiki/tools/ov.sh",
+  "openviking_start": "wiki/tools/start.sh",
+  "resource_root_uri": "viking://resources",
+  "wiki_root": "wiki"
+}

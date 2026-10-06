@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Playwright-BDD Step Implementor'
+  short_description: 'Implement or revisit BDD steps through runner replay'
+  default_prompt: 'Use $playwright-bdd-step-implementor to implement or revisit one scenario with runner-owned Playwright evidence on an explicit project.'

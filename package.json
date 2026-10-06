@@ -1,0 +1,30 @@
+{
+  "name": "playwright-ui-auto-v2",
+  "version": "1.0.0",
+  "private": true,
+  "description": "UI automation framework based on TypeScript, Playwright Test, and playwright-bdd.",
+  "scripts": {
+    "test": "npx bddgen && npx playwright test",
+    "test:skills": "playwright test -c .claude/skills/playwright-bdd-step-implementor/smoke/playwright.smoke.config.ts",
+    "bddgen": "npx bddgen",
+    "lint": "tsc --noEmit && eslint .",
+    "encrypt": "node scripts/encrypt-secret.mjs",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{ts,mjs,json}\"",
+    "report": "npx playwright show-report reports/playwright-html",
+    "report-cucumber": "http-server ./reports/cucumber -c-1 -a localhost -o index.html"
+  },
+  "author": "Derrick Deng",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.62.1",
+    "@types/node": "^24.10.0",
+    "eslint": "^10.3.0",
+    "eslint-plugin-playwright": "^2.10.1",
+    "http-server": "^14.1.1",
+    "playwright-bdd": "9.2.1",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.59.2"
+  }
+}
