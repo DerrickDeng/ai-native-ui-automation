@@ -1,5 +1,5 @@
 {
-  "name": "playwright-ui-auto-v2",
+  "name": "ai-native-ui-automation",
   "version": "1.0.0",
   "private": true,
   "description": "UI automation framework based on TypeScript, Playwright Test, and playwright-bdd.",
