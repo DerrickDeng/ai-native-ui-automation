@@ -99,7 +99,7 @@ npm test -- --project=hk-sit
 ```
 
 The bundled `todoMvc` sample needs only internet access. The Skill evals also
-need the local [QA Dashboard](https://github.com/<github-user>/qa-dashboard) and a
+need the local [QA Dashboard](https://github.com/DerrickDeng/qa-dashboard) and a
 git-ignored `.test-data-key`; see the
 [evals README](.claude/skills/playwright-bdd-step-implementor/evals/README.md).
 
