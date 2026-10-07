@@ -1,13 +1,14 @@
 # Evaluation Results
 
-Results of the Agent evaluations described in the [methodology](methodology.md).
-Small samples are reported as passed checks, not as success rates.
+These are the results of the agent evaluations in the
+[methodology](methodology.md). We show small samples as passed checks, not as
+success rates.
 
 ## playwright-bdd-step-implementor
 
-Recorded on 2026-09-27. Executor: Claude Sonnet 5; grader: Claude Opus 5.5.
-Each task is an authored scenario with a missing step that the Agent must
-implement against the live QA Dashboard
+Recorded on 2026-09-27. The executor is Claude Sonnet 5, and the grader is
+Claude Opus 5.5. In each task, an authored scenario has a missing step. The
+agent must implement it against the live QA Dashboard
 (see [evals.json](../../.claude/skills/playwright-bdd-step-implementor/evals/evals.json)).
 
 | Task                 | Checks passed | Agent time     |
@@ -21,17 +22,18 @@ implement against the live QA Dashboard
 | 7 tile-counts        | 19 / 19       | 7.3 min        |
 | **Total**            | **109 / 121** | median 7.3 min |
 
-Each task ran **once**. Agent time is wall-clock time from the prompt to the
-final report, including every test run. The checks and the Skill have changed
-since; these results have not been re-run against the current versions.
+Each task ran **once**. Agent time is the wall-clock time from the prompt to
+the final report. It includes all test runs. The checks and the skill changed
+after this run. We did not run the evaluation again on the current versions.
 
 ## playwright-bdd-test-healer
 
-Recorded on 2026-09-29. Executor: Claude Sonnet 5; grader: Claude Opus 5.5.
-Each task is a previously-green scenario that a QA Dashboard change has broken
+Recorded on 2026-09-29. The executor is Claude Sonnet 5, and the grader is
+Claude Opus 5.5. In each task, a scenario passed before, and a QA Dashboard
+change made it fail
 (see [evals.json](../../.claude/skills/playwright-bdd-test-healer/evals/evals.json)).
 
-| Task                | With the Skill | Agent time      | Without the Skill |
+| Task                | With the skill | Agent time      | Without the skill |
 | ------------------- | -------------- | --------------- | ----------------- |
 | 1 run-report        | 14 / 15        | 18.9 min        | not run           |
 | 2 defect-summary    | 12 / 15        | 6.9 min         | not run           |
@@ -41,15 +43,15 @@ Each task is a previously-green scenario that a QA Dashboard change has broken
 
 How to read this:
 
-- Each configuration ran **once** per task. This shows the Skill can do the
-  work on these tasks; it is not a measured success rate.
-- The run without the Skill covers task 4 only, so it is a single comparison
-  point, not a baseline for the whole set.
-- The checks were the ones in `evals.json` on that date (15 or 16 per task).
-  Checks were added later, and the Skill has changed since; these results have
-  not been re-run against the current versions.
+- Each configuration ran **once** for each task. The results show that the
+  skill can do the work on these tasks. They are not a measured success rate.
+- The run without the skill covers only task 4. It is one comparison point,
+  not a baseline for all tasks.
+- The checks are the checks in `evals.json` on that date (15 or 16 for each
+  task). We added checks later, and the skill changed. We did not run the
+  evaluation again on the current versions.
 
 ## Deterministic checks
 
 `npm run test:skills` runs the hermetic fixture, framework-contract, and
-Skill-contract tests on every change: 42 / 42 pass.
+skill-contract tests on each change: 42 / 42 pass.

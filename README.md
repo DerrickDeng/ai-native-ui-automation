@@ -1,111 +1,115 @@
-# Evidence-Driven AI-Assisted UI Automation
+# AI-Native UI Automation
 
-TypeScript UI automation framework built with Playwright Test and
-`playwright-bdd`. It compiles authored Gherkin into native Playwright tests,
-while two governed Agent workflows implement missing automation and repair
-previously-green tests from live browser evidence.
+A UI automation framework that uses Playwright Test and `playwright-bdd`. It
+compiles Gherkin into Playwright tests. Two agent workflows are part of the
+framework:
 
-This is not an LLM that freely edits tests until they pass. Gherkin remains the
-frozen business specification, generated tests remain build output, and every
-runner invocation is protected by generation and architecture checks.
+- The **step implementor** implements missing steps from live browser evidence.
+- The **test healer** repairs tests that passed before and now fail.
 
-## Why this is AI-assisted, not just Playwright
+The agent does not edit tests until they pass. The Gherkin is the business
+specification, and the agent cannot change it. Generated tests are build
+output. Generation and architecture checks protect each test run.
 
-Agent-assisted UI automation fails in predictable ways: it can rewrite the
-specification, edit generated output, guess a locator from a snapshot, or act
-through browser state that the test runner has not established. This repository
-turns those risks into explicit engineering constraints:
+## Why the agents need guardrails
 
-- **Frozen specifications:** Agent work never changes authored Gherkin merely
-  to make a scenario pass.
-- **Generation gate:** `bddgen` must succeed before a new debug, replay, or
-  direct Playwright runner invocation.
-- **Runner-owned state:** existing steps and `ctx`/fixture/API state are
-  established by Playwright, not imitated in a paused browser.
-- **Locator provenance:** every new locator traces to Playwright MCP tool
-  output, rather than being composed from accessibility-snapshot text.
-- **Evidence-bound stops:** when required content is proven absent, the Agent
-  reports a scenario or data problem instead of fabricating a green result.
+Agents make predictable mistakes in UI automation. An agent can change the
+specification, edit generated files, guess a locator from a snapshot, or use a
+browser state that the test runner did not create. This framework makes each
+risk an explicit rule:
+
+- **Frozen specification:** The agent never changes the Gherkin to make a
+  scenario pass.
+- **Generation gate:** `bddgen` must pass before each debug run, replay, or
+  direct Playwright run.
+- **Runner-owned state:** Playwright creates the state of the existing steps
+  (`ctx`, fixtures, and API data). The agent does not imitate it in a paused
+  browser.
+- **Locator evidence:** Each new locator comes from Playwright tool output. The
+  agent does not build a locator from the text of an accessibility snapshot.
+- **Honest stops:** When the agent proves that required content is not on the
+  page, it reports a scenario or data problem. It does not make a false green
+  result.
 
 ```mermaid
 flowchart LR
-  A[Authored Gherkin] --> B[bddgen gate]
+  A[Gherkin] --> B[bddgen gate]
   B --> C[Generated Playwright test]
-  C --> D[Runner establishes state or pauses]
+  C --> D[Runner creates state or pauses]
   D --> E[Browser evidence through MCP]
-  E --> F[Edit source architecture only]
+  E --> F[Edit source files only]
   F --> G[Lint and focused validation]
   G --> H[Report and human review]
 ```
 
-## Two governed workflows
+## Two agent workflows
 
-| Workflow                                                                                     | Use it for                                                                         | What keeps it controlled                                                                                                                                 |
-| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`playwright-bdd-step-implementor`](.claude/skills/playwright-bdd-step-implementor/SKILL.md) | Missing bindings, TODO steps, or an explicitly requested revisit of a passing step | TODO-block boundaries, runner-owned state, generation-before-run, locator provenance, bounded retries, and source-only edits                             |
-| [`playwright-bdd-test-healer`](.claude/skills/playwright-bdd-test-healer/SKILL.md)           | A previously-green, fully bound scenario that now fails                            | Failure triage, focused verification, Page Object repairs, no generated-output edits, no `fixme` escape hatch, and human escalation for spec/data errors |
+| Workflow                                                                                     | Use it for                                                            | What keeps it under control                                                                                                                      |
+| -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`playwright-bdd-step-implementor`](.claude/skills/playwright-bdd-step-implementor/SKILL.md) | Missing bindings, TODO steps, or a requested change to a passing step | TODO-block limits, runner-owned state, generation before each run, locator evidence, limited retries, and edits to source files only             |
+| [`playwright-bdd-test-healer`](.claude/skills/playwright-bdd-test-healer/SKILL.md)           | A scenario with all steps bound that passed before and now fails      | Failure triage, focused verification, Page Object repairs, no edits to generated files, no `fixme`, and a human decision for spec or data errors |
 
-The checked-in skills are the canonical workflows used by the local demos. This
-checkout does not include a Gemini mirror or a live Gemini cohort, so neither
-is claimed as verified evidence.
+The skills in this repository are the same skills that the local demos use.
+This repository has no Gemini mirror and no Gemini evaluation, so we make no
+claim for Gemini.
 
 The [`requirement-context-retrieval`](.claude/skills/requirement-context-retrieval/SKILL.md)
-support skill lets the step implementor search a matching requirements Wiki and
-verify cited Story or note versions before using a business rule. Its queries start the local OpenViking service when it is down, and fall back to
-committed Markdown if that fails.
+skill helps the step implementor. It searches the requirement wiki in
+[ai-native-test-design](https://github.com/DerrickDeng/ai-native-test-design),
+and it checks the version of each cited story or note before the agent uses a
+business rule. If the local OpenViking service is not running, the skill starts
+it. If the start fails, the skill searches the committed Markdown.
 
-## Verified local evidence
+## Evidence
 
-The following checks passed on 2026-10-06:
+These checks passed on 2026-10-06:
 
-| Check                                                                           | Result     | What it establishes                                            |
+| Check                                                                           | Result     | What it proves                                                 |
 | ------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------- |
-| `npm run lint`                                                                  | Pass       | TypeScript and repository lint rules hold                      |
-| `npm run bddgen`                                                                | Pass       | Bound Gherkin compiles to generated tests                      |
-| `node --test src/config/framework/__tests__/profile-tags/profile-tags.test.mjs` | 8/8 pass   | Exact profile-tag applicability and selection behavior         |
-| `npm run test:skills`                                                           | 42/42 pass | Hermetic fixture E2E, framework contracts, and Skill contracts |
+| `npm run lint`                                                                  | Pass       | TypeScript and the repository lint rules pass                  |
+| `npm run bddgen`                                                                | Pass       | The bound Gherkin compiles to generated tests                  |
+| `node --test src/config/framework/__tests__/profile-tags/profile-tags.test.mjs` | 8/8 pass   | Profile tags select the correct profiles                       |
+| `npm run test:skills`                                                           | 42/42 pass | Hermetic fixture E2E, framework contracts, and skill contracts |
 
-Deterministic checks prove the workflow mechanics and guardrails; they do not
-by themselves prove stable behavior from every model or every live application.
-They must not be read as a universal self-healing or autonomous testing claim.
+The deterministic checks prove the workflow mechanics and the guardrails. They
+do not prove that every model behaves the same way on every live application.
+Do not read them as a claim of general self-healing or autonomous testing.
 
-## Reproduce and assess the workflow
-
-- [Run the two local workflow demos](docs/demo/README.md) without a company
-  application, account, or network environment.
-- [Read the Agent and Skill evaluation methodology](docs/evaluation/methodology.md).
+- [Run the two local workflow demos](docs/demo/README.md). They need no company
+  application, account, or network.
+- [Read the evaluation methodology](docs/evaluation/methodology.md).
 - [Read the evaluation results](docs/evaluation/results.md).
 
-## Quick Start
+## Quick start
 
-**All commands are run in a bash terminal** (macOS Terminal or Windows WSL/Git Bash).
+Run all commands in a bash terminal (macOS Terminal, or WSL or Git Bash on
+Windows).
 
-Prerequisites:
+You need:
 
-- **Node.js `20.15+`** — npm is included
-- **Google Chrome** — Framework uses the installed `chrome` channel
+- **Node.js `20.15+`**, which includes npm
+- **Google Chrome**, because the framework uses the installed `chrome` channel
 
-Verify in bash terminal:
+Check the versions:
 
 ```bash
 node --version      # v20.15 or higher
 npm --version
 ```
 
-Install dependencies and run tests:
+Install the dependencies and run the tests:
 
 ```bash
 npm ci
 npm test -- --project=hk-sit
 ```
 
-The bundled `todoMvc` sample needs only internet access. The Skill evals also
-need the local [QA Dashboard](https://github.com/DerrickDeng/qa-dashboard) and a
-git-ignored `.test-data-key`; see the
+The `todoMvc` sample needs only internet access. The skill evaluations also
+need the local [QA Dashboard](https://github.com/DerrickDeng/qa-dashboard) and
+a `.test-data-key` file that Git ignores. See the
 [evals README](.claude/skills/playwright-bdd-step-implementor/evals/README.md).
 
-Every test run must select at least one profile through Playwright's
-`--project` option:
+Each test run must select at least one profile with the `--project` option:
 
 ```text
 hk-sit  hk-uat  sg-sit  sg-uat  tw-sit  tw-uat
@@ -113,24 +117,24 @@ hk-sit  hk-uat  sg-sit  sg-uat  tw-sit  tw-uat
 
 ## Commands
 
-| Purpose                     | Command                                                    |
-| --------------------------- | ---------------------------------------------------------- |
-| Run one profile             | `npm test -- --project=hk-sit`                             |
-| Run one folder              | `npm test -- --project=hk-sit src/features/todoMvc`        |
-| Run one scenario by title   | `npm test -- --project=hk-sit --grep "<Scenario title>"`   |
-| Filter by tag               | `npm test -- --project=hk-sit --grep "@tag"`               |
-| List selected tests         | `npm test -- --project=hk-sit src/features/todoMvc --list` |
-| Run headless                | `npm test -- --project=hk-sit --headless`                  |
-| Generate BDD tests          | `npm run bddgen`                                           |
-| Type-check and lint         | `npm run lint`                                             |
-| Verify framework and Skills | `npm run test:skills`                                      |
-| Open Playwright report      | `npm run report`                                           |
-| Open Cucumber report        | `npm run report-cucumber`                                  |
+| Purpose                    | Command                                                    |
+| -------------------------- | ---------------------------------------------------------- |
+| Run one profile            | `npm test -- --project=hk-sit`                             |
+| Run one folder             | `npm test -- --project=hk-sit src/features/todoMvc`        |
+| Run one scenario by title  | `npm test -- --project=hk-sit --grep "<Scenario title>"`   |
+| Filter by tag              | `npm test -- --project=hk-sit --grep "@tag"`               |
+| List the selected tests    | `npm test -- --project=hk-sit src/features/todoMvc --list` |
+| Run headless               | `npm test -- --project=hk-sit --headless`                  |
+| Generate the BDD tests     | `npm run bddgen`                                           |
+| Type-check and lint        | `npm run lint`                                             |
+| Check framework and skills | `npm run test:skills`                                      |
+| Open the Playwright report | `npm run report`                                           |
+| Open the Cucumber report   | `npm run report-cucumber`                                  |
 
-`npm test` runs `bddgen` automatically before Playwright.
-Local runs are headed by default; CI runs are headless.
+`npm test` runs `bddgen` before Playwright. Local runs show the browser. CI
+runs are headless.
 
-## Project Structure
+## Project structure
 
 ```text
 .
@@ -146,74 +150,76 @@ Local runs are headed by default; CI runs are headless.
 │   │   └── todoMvc/
 │   │       ├── todoFooter.steps.ts
 │   │       └── todoPage.steps.ts
-│   ├── data/                       # System-specific test data
+│   ├── data/                       # Test data for each system
 │   │   └── todoMvc/
-│   │       ├── expected/           # Expected values for assertions, by region
+│   │       ├── expected/           # Expected values, by region
 │   │       ├── inputs/             # Input values, by region and environment
-│   │       └── dataHelper.ts       # Shared data access utilities
-│   ├── fixtures/                   # Shared Playwright/BDD fixtures
+│   │       └── dataHelper.ts       # Shared data access
+│   ├── fixtures/                   # Shared Playwright and BDD fixtures
 │   ├── utils/                      # Shared utilities, including test-data encryption
 │   └── config/
-│       ├── profiles.json           # Profile URLs and custom runtime configuration
+│       ├── profiles.json           # Profile URLs and runtime settings
 │       └── framework/              # Profile and tag-selection logic
 ├── tests/.features-gen/            # Generated tests; do not edit
 ├── reports/                        # Playwright and Cucumber HTML reports
 └── test-results/                   # Traces, screenshots, and videos
 ```
 
-**System first:** each system uses the same folder name across `features`,
-`steps`, `pages`, and `data` (the bundled sample is `todoMvc`, which runs
-against Playwright's public TodoMVC demo). Nested business domains should also
-mirror the same hierarchy across layers, such as `trading/{order,quote}`. This keeps a system's behavior,
-automation, UI model, and data easy to trace across layers.
+**One system, one folder name:** Each system uses the same folder name in
+`features`, `steps`, `pages`, and `data`. The sample system is `todoMvc`. It
+runs against the public TodoMVC demo of Playwright. Nested business areas use
+the same hierarchy in all layers, for example `trading/{order,quote}`. Then you
+can trace the behavior, automation, UI model, and data of a system across the
+layers.
 
 - Features describe business behavior.
 - Steps are thin bindings from Gherkin to Page Objects.
-- Page Objects own locators, interactions, and page assertions.
+- Page Objects own the locators, the interactions, and the page assertions.
 - Generated tests, reports, and test artifacts are disposable.
 
-### Active page in a Scenario
+### Active page in a scenario
 
-`src/fixtures/bddTest.ts` creates a test-scoped `PageContext` from Playwright's
-`page` when a fixture or hook needs it. Every Page Object in that Scenario
-receives the same `PageContext`. `BasePage.page` reads `pageContext.current` each
-time, so an existing Page Object can follow a changed active page without being
-recreated. A new Scenario receives a fresh `PageContext` and Playwright page.
+`src/fixtures/bddTest.ts` creates a `PageContext` from the Playwright `page`
+when a fixture or a hook needs it. All Page Objects in the scenario get the
+same `PageContext`. `BasePage.page` reads `pageContext.current` each time. So
+an existing Page Object can follow a new active page, and you do not need to
+create it again. Each new scenario gets a new `PageContext` and a new
+Playwright page.
 
-`ctx` stores business values passed between steps; `PageContext` holds only the
-active browser page. Page switching belongs in a Page Object, while steps keep
-delegating to Page Objects. Per-step screenshots and development checkpoints
-also read the current page. The framework does not yet provide a popup capture,
-tab selection, or return-to-main-page method.
+`ctx` keeps business values between steps. `PageContext` keeps only the active
+browser page. Page switches belong in a Page Object, and steps call Page
+Objects. Step screenshots and development checkpoints also read the current
+page. The framework does not have a popup capture, tab selection, or
+return-to-main-page method yet.
 
-## Adding a Page Object
+## Add a Page Object
 
-1. Add the Page Object under `src/pages/<system>/`.
-2. Add any required profile URLs or custom runtime parameters to
+1. Add the Page Object in `src/pages/<system>/`.
+2. Add the profile URLs or runtime settings that it needs to
    `src/config/profiles.json`.
 3. Register the Page Object in `src/fixtures/bddTest.ts`.
-4. Add step definitions under `src/steps/<system>/`.
-5. Add or update the feature under `src/features/<system>/`.
-6. Run `npm run lint` and the relevant feature.
+4. Add the step definitions in `src/steps/<system>/`.
+5. Add or update the feature in `src/features/<system>/`.
+6. Run `npm run lint` and the related feature.
 
-See [`CodeRules.md`](./CodeRules.md) for implementation guidelines.
+[`CodeRules.md`](./CodeRules.md) has the implementation rules.
 
 ## Profiles
 
 A profile defines where and how a test runs: its region, environment, URLs, and
-runtime configuration. Available profiles are `hk-sit`, `hk-uat`, `sg-sit`,
-`sg-uat`, `tw-sit`, and `tw-uat`.
+runtime settings. The profiles are `hk-sit`, `hk-uat`, `sg-sit`, `sg-uat`,
+`tw-sit`, and `tw-uat`.
 
-Select at least one profile with Playwright's `--project` option:
+Select at least one profile with the `--project` option:
 
 ```bash
 npm test -- --project=hk-sit
 ```
 
-### Configuring profile parameters
+### Profile parameters
 
-Edit [`src/config/profiles.json`](./src/config/profiles.json) to configure each
-profile:
+Set the values for each profile in
+[`src/config/profiles.json`](./src/config/profiles.json):
 
 ```json
 "hk-sit": {
@@ -226,8 +232,8 @@ profile:
 
 ### Profile tags
 
-Add profile tags to a Feature or Scenario in its `.feature` file to declare
-which profiles can run it:
+Add profile tags to a Feature or a Scenario in its `.feature` file. The tags
+tell which profiles can run it:
 
 ```gherkin
 @hk-sit @sg-sit
@@ -238,54 +244,54 @@ Feature: Todo list
     When the user adds the todo "groceries"
 ```
 
-This Feature runs with `hk-sit` and `sg-sit`, but not with the other profiles.
-Profile tags must be exact lowercase profile names. Multiple tags form an
-allowlist:
+This Feature runs with `hk-sit` and `sg-sit` only. Profile tags must be exact
+lowercase profile names. More than one tag makes an allowlist:
 
 | Tags                      | Supported profiles                                   |
 | ------------------------- | ---------------------------------------------------- |
 | `@hk-sit`                 | `hk-sit` only                                        |
 | `@hk-sit @sg-sit`         | `hk-sit`, `sg-sit`                                   |
 | `@hk-sit @hk-uat @sg-uat` | The three listed profiles; `sg-sit` is not supported |
-| No profile tag            | Every profile                                        |
+| No profile tag            | All profiles                                         |
 
-- Dimension tags such as `@hk` and `@sit`, uppercase variants, and invalid profile names fail before BDD generation.
-- Profile tags may be placed on a Feature, Rule, Scenario, Scenario Outline, or Examples block; inherited tags are combined.
-
-- Other tags such as `@smoke` do not change profile applicability and remain
-  available for Playwright filtering:
+- Dimension tags such as `@hk` and `@sit`, uppercase tags, and incorrect
+  profile names fail before BDD generation.
+- You can put profile tags on a Feature, Rule, Scenario, Scenario Outline, or
+  Examples block. The tags are inherited and combined.
+- Other tags such as `@smoke` do not change which profiles apply. You can use
+  them for Playwright filters:
   ```bash
   npm test -- --project=hk-sit --grep "@smoke"
   ```
 
-## playwright-bdd Tags
+## playwright-bdd tags
 
-These tags control how Playwright runs a feature or scenario:
+These tags control how Playwright runs a feature or a scenario:
 
-| Tag               | Purpose                                                                       |
-| ----------------- | ----------------------------------------------------------------------------- |
-| `@skip`           | Skip a test temporarily. Add a comment with the reason and removal condition. |
-| `@fixme`          | Mark a known-broken or unfinished test that should not run yet.               |
-| `@only`           | Run only the tagged test locally; CI rejects committed `@only`.               |
-| `@slow`           | Mark a test as slow and give it Playwright's extended timeout.                |
-| `@fail`           | Declare that the test is currently expected to fail.                          |
-| `@retries:2`      | Override the retry count for the tagged test or suite.                        |
-| `@timeout:180000` | Set a timeout in milliseconds; underscores are allowed for readability.       |
-| `@mode:parallel`  | Set execution mode to `default`, `parallel`, or `serial`.                     |
+| Tag               | Purpose                                                                  |
+| ----------------- | ------------------------------------------------------------------------ |
+| `@skip`           | Skip a test for a short time. Add a comment with the reason and the end. |
+| `@fixme`          | Mark a test that is broken or not finished and must not run yet.         |
+| `@only`           | Run only the tagged test locally. CI rejects a committed `@only`.        |
+| `@slow`           | Mark a test as slow and give it the extended Playwright timeout.         |
+| `@fail`           | Declare that the test fails at this time, as expected.                   |
+| `@retries:2`      | Change the retry count for the tagged test or suite.                     |
+| `@timeout:180000` | Set a timeout in milliseconds. You can use underscores to make it clear. |
+| `@mode:parallel`  | Set the execution mode to `default`, `parallel`, or `serial`.            |
 
-Prefer fixing or filtering tests normally; reserve `@only`, `@skip`, `@fixme`,
-and `@fail` for explicit, short-lived intent.
+Fix or filter tests in the usual way when possible. Use `@only`, `@skip`,
+`@fixme`, and `@fail` only for a clear, short-term reason.
 
-## Test Reports
+## Test reports
 
-Each test run writes reports under `reports/`. Run a test profile first, then
-use the corresponding command to open the report locally:
+Each test run writes reports in `reports/`. Run a profile first. Then open the
+report with its command:
 
-| Report          | Location                             | Description                                                                                    |
-| --------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| Playwright HTML | `reports/playwright-html/index.html` | Detailed test results with project grouping, steps, errors, and available failure attachments. |
-| Cucumber HTML   | `reports/cucumber/index.html`        | BDD-oriented results organized by feature and scenario.                                        |
-| Cucumber JSON   | `reports/cucumber-report.json`       | Machine-readable report in JSON format used for QA Dashboard integration and analytics.        |
+| Report          | Location                             | Description                                                               |
+| --------------- | ------------------------------------ | ------------------------------------------------------------------------- |
+| Playwright HTML | `reports/playwright-html/index.html` | Test results with project groups, steps, errors, and failure attachments. |
+| Cucumber HTML   | `reports/cucumber/index.html`        | BDD results by feature and scenario.                                      |
+| Cucumber JSON   | `reports/cucumber-report.json`       | Machine-readable JSON report for the QA Dashboard and for analytics.      |
 
 ```bash
 # Generate reports for one profile
@@ -298,29 +304,29 @@ npm run report
 npm run report-cucumber
 ```
 
-On failure, Playwright stores screenshots, traces, and local-run videos under
-`test-results/`. Generated reports and test artifacts are ignored by Git.
+When a test fails, Playwright keeps screenshots, traces, and local-run videos
+in `test-results/`. Git ignores the reports and the test artifacts.
 
-For release-regression evidence, enable a viewport screenshot after every
-completed BDD step by setting `STEP_SCREENSHOTS=1` for the run:
+For release-regression evidence, you can take a screenshot after each BDD step.
+Set `STEP_SCREENSHOTS=1` for the run:
 
 ```bash
 STEP_SCREENSHOTS=1 npm test -- --project=hk-sit
 ```
 
-These screenshots are attached to their corresponding steps in both HTML
-reports.
+Both HTML reports attach each screenshot to its step.
 
-## Development Rules
+## Development rules
 
-- Page Objects own locators, page interactions, and page assertions.
-- Follow [`Adding a Page Object`](#adding-a-page-object) when
-  creating and registering a new Page Object.
-- Step files pair with Page Objects, not feature files.
-- Step callbacks use normal `async function` syntax and fixture parameters.
-- `ctx` shares values only within one Scenario and is fresh for the next; see
-  [`CodeRules.md`](./CodeRules.md#x--fixtures-and-scenario-context).
-- Prefer Playwright auto-waiting and web-first assertions. Any fixed wait must
-  include a comment explaining why it is necessary.
+- Page Objects own the locators, the page interactions, and the page
+  assertions.
+- To create and register a new Page Object, follow
+  [Add a Page Object](#add-a-page-object).
+- Each step file pairs with a Page Object, not with a feature file.
+- Step callbacks use the usual `async function` syntax and fixture parameters.
+- `ctx` keeps values only in one scenario. The next scenario gets a new `ctx`.
+  See [`CodeRules.md`](./CodeRules.md#x--fixtures-and-scenario-context).
+- Use Playwright auto-waiting and web-first assertions. Each fixed wait must
+  have a comment that tells why it is necessary.
 - Follow [`CodeRules.md`](./CodeRules.md) for locator organization and coding
-  conventions.
+  rules.
