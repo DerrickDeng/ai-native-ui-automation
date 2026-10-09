@@ -4,7 +4,30 @@ These are the results of the agent evaluations in the
 [methodology](methodology.md). We show small samples as passed checks, not as
 success rates.
 
-## playwright-bdd-step-implementor
+## playwright-bdd-step-implementor: with and without the skill
+
+Recorded on 2026-10-01. The executor is Claude Sonnet 5.5, and the grader is
+Claude Opus. In each task, the agent implements a missing step against the live
+QA Dashboard. The run without the skill uses the same task and the same
+repository, with the same `CLAUDE.md` and `CodeRules.md`, but no skill.
+
+| Task                | Without the skill | With the skill    |
+| ------------------- | ----------------- | ----------------- |
+| 8 pass-rate-check   | 6 / 19 (2.0 min)  | 17 / 19 (4.3 min) |
+| 9 failing-not-flaky | 7 / 17 (12.2 min) | 17 / 17 (5.1 min) |
+| **Total**           | **13 / 36**       | **34 / 36**       |
+
+Each configuration ran **once** for each task, so this is two comparison
+points, not a success rate. Without the skill, the agent failed in the same
+places in both tasks:
+
+- It did not look up the business rule in the requirement wiki. In task 8 it
+  built the wrong pass-rate check: it counted flaky tests as passed.
+- Its locators did not come from live page evidence.
+- It broke safety rules: it wrote files outside its worktree, and in task 8 it
+  tried to read the password of the test account outside the test code.
+
+## playwright-bdd-step-implementor: all tasks
 
 Recorded on 2026-09-27. The executor is Claude Sonnet 5, and the grader is
 Claude Opus 5.5. In each task, an authored scenario has a missing step. The
