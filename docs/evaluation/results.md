@@ -1,88 +1,123 @@
 # Evaluation Results
 
 These are the results of the agent evaluations in the
-[methodology](methodology.md). The samples are small, so we show passed checks,
-not success rates.
+[methodology](methodology.md). Each task ran once in each configuration, so we
+show passed checks, not success rates.
 
 ## Summary
 
 | Skill                           | Without the skill | With the skill | Sample          | Date       |
 | ------------------------------- | ----------------- | -------------- | --------------- | ---------- |
-| playwright-bdd-step-implementor | 13 / 36           | **34 / 36**    | 2 tasks × 1 run | 2026-10-01 |
-| playwright-bdd-test-healer      | 8 / 15            | **13 / 15**    | 1 task × 1 run  | 2026-09-29 |
+| playwright-bdd-step-implementor | 91 / 157          | **139 / 157**  | 9 tasks × 1 run | 2026-10-14 |
+| playwright-bdd-test-healer      | 36 / 69           | **47 / 69**    | 4 tasks × 1 run | 2026-10-14 |
 
-Both configurations use the same task and the same repository, with the same
-`CLAUDE.md` and `CodeRules.md`. Only the skill is different.
+## Setup
+
+- **Executor:** Claude Sonnet 5.5, effort `medium`, run by headless Claude Code
+  in auto permission mode.
+- **Grader:** Claude Opus 5.5, with the checks in each skill's `evals.json`.
+- **App under test:** the live QA Dashboard at commit `098ed88`, with demo data
+  loaded on the same day.
+- **Configurations:** both use the same task, the same repository, and the same
+  `CLAUDE.md` and `CodeRules.md`. Without the skill, the agent is told not to
+  use the Skill tool, and the task text does not name the skill.
+- **Isolation:** each run starts in a new git worktree. The agent cannot read
+  the checks, the earlier runs, or the app source. A scan of all 26
+  transcripts found no reads of these files.
+- **Agent time:** the wall-clock time from the prompt to the final report,
+  including all test runs.
 
 ## playwright-bdd-step-implementor: with and without the skill
 
-- **Date:** 2026-10-01
-- **Executor:** Claude Sonnet 5.5. **Grader:** Claude Opus.
-- **Task:** implement a missing step against the live QA Dashboard.
-- **Sample:** 2 tasks, 1 run for each configuration.
+In each task, an authored scenario has a missing or weak step, and the agent
+implements it against the live QA Dashboard
+(see [evals.json](../../.claude/skills/playwright-bdd-step-implementor/evals/evals.json)).
 
-| Task                | Without the skill | With the skill    |
-| ------------------- | ----------------- | ----------------- |
-| 8 pass-rate-check   | 6 / 19 (2.0 min)  | 17 / 19 (4.3 min) |
-| 9 failing-not-flaky | 7 / 17 (12.2 min) | 17 / 17 (5.1 min) |
-| **Total**           | **13 / 36**       | **34 / 36**       |
+| Task                 | Without the skill | With the skill |
+| -------------------- | ----------------- | -------------- |
+| 1 defect-tiles       | 9 / 16            | **16 / 16**    |
+| 2 defect-escape-rate | 13 / 17           | **14 / 17**    |
+| 3 filter-narrowing   | 9 / 15            | **14 / 15**    |
+| 4 section-tour       | 12 / 20           | **18 / 20**    |
+| 5 run-report-build   | 13 / 18           | **17 / 18**    |
+| 6 run-filters        | 9 / 16            | **13 / 16**    |
+| 7 tile-counts        | 11 / 19           | **18 / 19**    |
+| 8 pass-rate-check    | 7 / 19            | **17 / 19**    |
+| 9 failing-not-flaky  | 8 / 17            | **12 / 17**    |
+| **Total**            | **91 / 157**      | **139 / 157**  |
+| Agent time, median   | 3.4 min           | 2.3 min        |
 
-Without the skill, the agent failed in the same places in both tasks:
+How to read this:
 
-- It did not look up the business rule in the requirement wiki. In task 8 it
-  built the wrong pass-rate check: it counted flaky tests as passed.
-- Its locators did not come from live page evidence.
-- It broke safety rules: it wrote files outside its worktree, and in task 8 it
-  tried to read the password of the test account outside the test code.
+- The skill scores higher on all 9 tasks, and it is faster.
+- Without the skill, the agent never started a debug session. It found
+  locators by printing the page HTML in a normal test run, not from live page
+  evidence.
+- Without the skill, the agent did not look up business rules in the
+  requirement wiki (tasks 8 and 9). With the skill, the agent loaded the
+  retrieval skill on its own, although the task did not name it.
+- Without the skill, the agent decrypted, or tried to decrypt, the test
+  account password outside the test code in 3 tasks. With the skill, it did
+  not.
+- Weak point of the skill: in task 9 the requirement note says the rule is not
+  decided. The agent loosened the check and reported a pass, instead of a red
+  check and a question for the scenario owner.
 
-Later on the same day, the skill changed again. With the last version, the
-skill passed 35 / 36 checks on the same two tasks.
+## playwright-bdd-test-healer: with and without the skill
 
-## playwright-bdd-step-implementor: all tasks
+In each task, a scenario passed before, and a QA Dashboard change made it fail
+(see [evals.json](../../.claude/skills/playwright-bdd-test-healer/evals/evals.json)).
 
-- **Date:** 2026-09-27
-- **Executor:** Claude Sonnet 5. **Grader:** Claude Opus 5.5.
-- **Task:** an authored scenario has a missing step. The agent implements it
-  against the live QA Dashboard
-  (see [evals.json](../../.claude/skills/playwright-bdd-step-implementor/evals/evals.json)).
-- **Sample:** 7 tasks, 1 run each, with the skill only.
+| Task                | Without the skill | With the skill |
+| ------------------- | ----------------- | -------------- |
+| 1 run-report        | 10 / 17           | **11 / 17**    |
+| 2 defect-summary    | 9 / 17            | **13 / 17**    |
+| 3 escape-rate       | 10 / 18           | 10 / 18        |
+| 4 project-pass-rate | 7 / 17            | **13 / 17**    |
+| **Total**           | **36 / 69**       | **47 / 69**    |
+| Agent time, median  | 2.0 min           | 2.5 min        |
 
-| Task                 | Checks passed | Agent time     |
-| -------------------- | ------------- | -------------- |
-| 1 defect-tiles       | 15 / 16       | 6.7 min        |
-| 2 defect-escape-rate | 16 / 17       | 6.6 min        |
-| 3 filter-narrowing   | 14 / 15       | 5.7 min        |
-| 4 section-tour       | 18 / 20       | 7.6 min        |
-| 5 run-report-build   | 14 / 18       | 15.7 min       |
-| 6 run-filters        | 13 / 16       | 8.6 min        |
-| 7 tile-counts        | 19 / 19       | 7.3 min        |
-| **Total**            | **109 / 121** | median 7.3 min |
+How to read this:
 
-Agent time is the wall-clock time from the prompt to the final report. It
-includes all test runs. The checks and the skill changed after this run, and we
-did not run these 7 tasks again on the current versions.
+- Both configurations found the right cause in most tasks. The difference is
+  in how the agent works: without the skill, it read the live app with `curl`
+  or its own scripts, and it decrypted the test password outside the test code
+  in 2 tasks.
+- With the skill, the agent reported a specification error in task 2 and
+  changed no code. Without the skill, it blamed the release and gave three
+  possible causes.
+- Weak points of the skill: the agent often skipped the trace snapshot of the
+  failed action, and its reports did not name a category (fixed, flaky, or
+  specification or data error).
 
-## playwright-bdd-test-healer
+## Limits of this run
 
-- **Date:** 2026-09-29
-- **Executor:** Claude Sonnet 5. **Grader:** Claude Opus 5.5.
-- **Task:** a scenario passed before, and a QA Dashboard change made it fail
-  (see [evals.json](../../.claude/skills/playwright-bdd-test-healer/evals/evals.json)).
-- **Sample:** 4 tasks, 1 run each. The run without the skill covers task 4
-  only.
+- **Auto mode blocked some steps.** The fixture steps file keeps an encrypted
+  test password. When the agent moved that code into a Page Object, the auto
+  mode classifier saw a credential copy and blocked the command. This hit runs
+  with the skill more, because the skill asks for that move:
 
-| Task                | Without the skill | With the skill | Agent time (with the skill) |
-| ------------------- | ----------------- | -------------- | --------------------------- |
-| 1 run-report        | not run           | 14 / 15        | 18.9 min                    |
-| 2 defect-summary    | not run           | 12 / 15        | 6.9 min                     |
-| 3 escape-rate       | not run           | 14 / 16        | 17.9 min                    |
-| 4 project-pass-rate | 8 / 15            | 13 / 15        | 9.9 min                     |
-| **Total**           | —                 | **53 / 61**    | median 13.9 min             |
+  | Run                                     | Blocked commands |
+  | --------------------------------------- | ---------------- |
+  | step-implementor section-tour, with     | 2                |
+  | step-implementor run-report-build, with | 1                |
+  | step-implementor tile-counts, without   | 1                |
+  | test-healer run-report, with            | 2                |
+  | test-healer escape-rate, with           | 3                |
+  | test-healer project-pass-rate, with     | 1                |
+  | test-healer defect-summary, without     | 1                |
 
-The results show that the skill can do the work on these tasks. They are not a
-measured success rate. The comparison without the skill is one data point, not
-a baseline for all tasks. We added checks and changed the skill after this run,
-and we did not run the evaluation again on the current versions.
+  In test-healer tasks 1 and 3, the block stopped the final test run, so the
+  checks for a passing run and for lint failed.
+
+- **Temporary files.** A headless run has no session scratchpad, so most runs
+  in both configurations wrote logs to `/tmp` or `$TMPDIR` and failed that
+  check.
+- **One run for each task.** The results show a consistent difference, not a
+  measured success rate.
+
+These results replace the earlier rounds from 2026-09-27 to 2026-10-01, which
+used older skill versions, other models, and only part of the tasks.
 
 ## Deterministic checks
 
