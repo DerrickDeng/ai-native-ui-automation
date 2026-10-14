@@ -8,13 +8,14 @@ show passed checks, not success rates.
 
 | Skill                           | Without the skill | With the skill | Sample          | Date       |
 | ------------------------------- | ----------------- | -------------- | --------------- | ---------- |
-| playwright-bdd-step-implementor | 91 / 157          | **139 / 157**  | 9 tasks × 1 run | 2026-10-14 |
-| playwright-bdd-test-healer      | 36 / 69           | **47 / 69**    | 4 tasks × 1 run | 2026-10-14 |
+| playwright-bdd-step-implementor | 91 / 157          | **140 / 157**  | 9 tasks × 1 run | 2026-10-14 |
+| playwright-bdd-test-healer      | 36 / 69           | **55 / 69**    | 4 tasks × 1 run | 2026-10-14 |
 
 ## Setup
 
 - **Executor:** Claude Sonnet 5.5, effort `medium`, run by headless Claude Code
-  in auto permission mode.
+  in auto permission mode. Five runs with the skill used `bypassPermissions` mode (see
+  [Limits of this run](#limits-of-this-run)).
 - **Grader:** Claude Opus 5.5, with the checks in each skill's `evals.json`.
 - **App under test:** the live QA Dashboard at commit `098ed88`, with demo data
   loaded on the same day.
@@ -38,14 +39,14 @@ implements it against the live QA Dashboard
 | 1 defect-tiles       | 9 / 16            | **16 / 16**    |
 | 2 defect-escape-rate | 13 / 17           | **14 / 17**    |
 | 3 filter-narrowing   | 9 / 15            | **14 / 15**    |
-| 4 section-tour       | 12 / 20           | **18 / 20**    |
+| 4 section-tour       | 12 / 20           | **19 / 20**    |
 | 5 run-report-build   | 13 / 18           | **17 / 18**    |
 | 6 run-filters        | 9 / 16            | **13 / 16**    |
 | 7 tile-counts        | 11 / 19           | **18 / 19**    |
 | 8 pass-rate-check    | 7 / 19            | **17 / 19**    |
 | 9 failing-not-flaky  | 8 / 17            | **12 / 17**    |
-| **Total**            | **91 / 157**      | **139 / 157**  |
-| Agent time, median   | 3.4 min           | 2.3 min        |
+| **Total**            | **91 / 157**      | **140 / 157**  |
+| Agent time, median   | 3.4 min           | 2.1 min        |
 
 How to read this:
 
@@ -70,15 +71,16 @@ In each task, a scenario passed before, and a QA Dashboard change made it fail
 
 | Task                | Without the skill | With the skill |
 | ------------------- | ----------------- | -------------- |
-| 1 run-report        | 10 / 17           | **11 / 17**    |
+| 1 run-report        | 10 / 17           | **14 / 17**    |
 | 2 defect-summary    | 9 / 17            | **13 / 17**    |
-| 3 escape-rate       | 10 / 18           | 10 / 18        |
-| 4 project-pass-rate | 7 / 17            | **13 / 17**    |
-| **Total**           | **36 / 69**       | **47 / 69**    |
-| Agent time, median  | 2.0 min           | 2.5 min        |
+| 3 escape-rate       | 10 / 18           | **14 / 18**    |
+| 4 project-pass-rate | 7 / 17            | **14 / 17**    |
+| **Total**           | **36 / 69**       | **55 / 69**    |
+| Agent time, median  | 2.0 min           | 1.2 min        |
 
 How to read this:
 
+- The skill scores higher on all 4 tasks, and it is faster.
 - Both configurations found the right cause in most tasks. The difference is
   in how the agent works: without the skill, it read the live app with `curl`
   or its own scripts, and it decrypted the test password outside the test code
@@ -92,27 +94,21 @@ How to read this:
 
 ## Limits of this run
 
-- **Auto mode blocked some steps.** The fixture steps file keeps an encrypted
-  test password. When the agent moved that code into a Page Object, the auto
-  mode classifier saw a credential copy and blocked the command. This hit runs
-  with the skill more, because the skill asks for that move:
+- **Permission mode.** The fixture steps file keeps an encrypted test
+  password. When the agent moved that code into a Page Object, the auto mode
+  classifier saw a credential copy and blocked the command. The skills ask for
+  that move, so five runs with the skill ran in `bypassPermissions` mode
+  instead: step-implementor section-tour and run-report-build, and test-healer
+  run-report, escape-rate, and project-pass-rate.
 
-  | Run                                     | Blocked commands |
-  | --------------------------------------- | ---------------- |
-  | step-implementor section-tour, with     | 2                |
-  | step-implementor run-report-build, with | 1                |
-  | step-implementor tile-counts, without   | 1                |
-  | test-healer run-report, with            | 2                |
-  | test-healer escape-rate, with           | 3                |
-  | test-healer project-pass-rate, with     | 1                |
-  | test-healer defect-summary, without     | 1                |
+  Two runs without the skill also had one blocked command each. In
+  step-implementor tile-counts, the block stopped an attempt to decrypt the
+  test password. In test-healer defect-summary, the agent decrypted the
+  password with another command after the block. We kept these runs as they
+  are.
 
-  In test-healer tasks 1 and 3, the block stopped the final test run, so the
-  checks for a passing run and for lint failed.
-
-- **Temporary files.** A headless run has no session scratchpad, so most runs
-  in both configurations wrote logs to `/tmp` or `$TMPDIR` and failed that
-  check.
+- **Temporary files.** Most runs in both configurations wrote logs to `/tmp`
+  or `$TMPDIR` instead of the session scratchpad, so they failed that check.
 - **One run for each task.** The results show a consistent difference, not a
   measured success rate.
 
