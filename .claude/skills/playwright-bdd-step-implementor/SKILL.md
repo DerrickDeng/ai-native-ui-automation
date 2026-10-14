@@ -126,6 +126,8 @@ Each item below is a mistake observed in real runs of this skill. Add to this li
 - **Stopping because the blocker is an existing step.** If an earlier step in the target Scenario leaves the page wrong, fixing it is in scope ([Required task inputs](#required-task-inputs)).
 - **Calling a red Scenario "the expected result" when required content is absent.** Absent content means the Scenario or its test data looks wrong; say so and name who must fix it.
 - **An allowlist or a name-to-locator lookup table for values a step passes in.** Use the argument directly: it needs no `locators` entry. When the method must act differently per value, it branches on the value inside the method and throws `Unsupported <thing>` in the last branch (CodeRules P-12). When the value goes straight into the page, such as a dropdown option or text to type, pass it through: there is nothing to branch on, and a list of allowed values is the separate allowlist P-12 forbids. Locator calls stay inside methods (P-7); URL patterns are expected values, not locators, so they keep their own constant.
+- **Weakening a check because the requirement is undecided.** A requirement note said the Scenario's claim was not decided. The agent filtered the rows until the check compared nothing, and reported a pass. Implement the claim as the Scenario writes it. If the check is red, leave it red, and hand it to the Scenario's owner as a question ([Output Contract](#output-contract--quality-gates)).
+- **Temporary files in `/tmp` or `$TMPDIR`.** Logs, snapshots, and dumps go only in your session scratchpad, the `<scratchpad>` in every command of this skill. Runs that wrote `snapshot > /tmp/x` failed review even when they deleted the file later.
 - **Locator details in the handoff.** Levels and sources are an internal check; the user gets the four plain parts only.
 
 ## Workflow & Routing
@@ -262,6 +264,9 @@ In "Files changed", give each path one plain line about what it does for the use
 - [ ] `npm run lint` passed.
 - [ ] Every development checkpoint was removed and final validation used the normal `playwright.config.ts` without `--debug=cli`.
 - [ ] The handoff has the four parts above in plain words.
+- [ ] The test result in the handoff says how many times you started the test to look at the page, and how many times you restarted it.
+- [ ] When a requirement note says the Scenario's claim is undecided or not guaranteed, the check still does what the Scenario says, and a red result goes to the owner as a question.
+- [ ] Every temporary file you wrote is in your session scratchpad, not in `/tmp`, `$TMPDIR`, or the worktree.
 - [ ] Anything you saw on the page that the requirement context contradicts (for example helper text that disagrees with the Story) is named under what needs attention, even when the Scenario passes, with what the page says, what the Story says, and that the owner should confirm.
 
 Stop testing after the target passes. In the handoff, highlight each changed shared Page Object method and its affected direct-caller Scenarios, marking those Scenarios as not run. Do not run the direct callers or the entire selected project unless the user asks.
