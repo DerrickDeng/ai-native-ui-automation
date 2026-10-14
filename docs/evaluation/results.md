@@ -9,12 +9,12 @@ show passed checks, not success rates.
 | Skill                           | Without the skill | With the skill | Sample          | Date       |
 | ------------------------------- | ----------------- | -------------- | --------------- | ---------- |
 | playwright-bdd-step-implementor | 91 / 157          | **150 / 157**  | 9 tasks × 1 run | 2026-10-14 |
-| playwright-bdd-test-healer      | 36 / 69           | **55 / 69**    | 4 tasks × 1 run | 2026-10-14 |
+| playwright-bdd-test-healer      | 44 / 69           | **65 / 69**    | 4 tasks × 1 run | 2026-10-14 |
 
 ## Setup
 
 - **Executor:** Claude Sonnet 5.5, effort `medium`, run by headless Claude Code
-  in auto permission mode. Five runs with the skill used `bypassPermissions` mode (see
+  in auto permission mode. Six runs with the skill used `bypassPermissions` mode (see
   [Limits of this run](#limits-of-this-run)).
 - **Grader:** Claude Opus 5.5, with the checks in each skill's `evals.json`.
 - **App under test:** the live QA Dashboard at commit `098ed88`, with demo data
@@ -77,12 +77,12 @@ In each task, a scenario passed before, and a QA Dashboard change made it fail
 
 | Task                | Without the skill | With the skill |
 | ------------------- | ----------------- | -------------- |
-| 1 run-report        | 10 / 17           | **14 / 17**    |
-| 2 defect-summary    | 9 / 17            | **13 / 17**    |
-| 3 escape-rate       | 10 / 18           | **14 / 18**    |
-| 4 project-pass-rate | 7 / 17            | **14 / 17**    |
-| **Total**           | **36 / 69**       | **55 / 69**    |
-| Agent time, median  | 2.0 min           | 1.2 min        |
+| 1 run-report        | 12 / 17           | **16 / 17**    |
+| 2 defect-summary    | 10 / 17           | **16 / 17**    |
+| 3 escape-rate       | 13 / 18           | **17 / 18**    |
+| 4 project-pass-rate | 9 / 17            | **16 / 17**    |
+| **Total**           | **44 / 69**       | **65 / 69**    |
+| Agent time, median  | 2.0 min           | 1.8 min        |
 
 How to read this:
 
@@ -94,18 +94,28 @@ How to read this:
 - With the skill, the agent reported a specification error in task 2 and
   changed no code. Without the skill, it blamed the release and gave three
   possible causes.
-- Weak points of the skill: the agent often skipped the trace snapshot of the
-  failed action, and its reports did not name a category (fixed, flaky, or
-  specification or data error).
+- The skill runs here are from skill commit `82d1b0d`. The first round showed
+  three weak points: the agent wrote locators by hand instead of using
+  `generate-locator`, piped `npx playwright trace` output through `head` or
+  `tail`, and wrote logs to `/tmp`. That commit added a gotcha for each.
+  The skill total went from 55 / 69 to 65 / 69.
+- The same commit changed six checks. They required a trace snapshot or a
+  `pause-at` stop as the page of the failing action. They now also accept the
+  error-context file, which shows the same page at the moment of failure. The
+  check that a new locator comes from tool output did not change. Both
+  configurations were graded again with the new checks.
+- Remaining weak points: in three tasks the agent still made one slip, such as
+  one log in `/tmp` or one `head` on trace output. In task 1 it copied part of
+  the test password from trace output into a command.
 
 ## Limits of this run
 
 - **Permission mode.** The fixture steps file keeps an encrypted test
   password. When the agent moved that code into a Page Object, the auto mode
   classifier saw a credential copy and blocked the command. The skills ask for
-  that move, so five runs with the skill ran in `bypassPermissions` mode
-  instead: step-implementor section-tour and run-report-build, and test-healer
-  run-report, escape-rate, and project-pass-rate.
+  that move, so six runs with the skill ran in `bypassPermissions` mode
+  instead: step-implementor section-tour and run-report-build, and all four
+  test-healer tasks.
 
   Two runs without the skill also had one blocked command each. In
   step-implementor tile-counts, the block stopped an attempt to decrypt the
