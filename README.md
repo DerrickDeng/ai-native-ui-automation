@@ -62,7 +62,7 @@ it. If the start fails, the skill searches the committed Markdown.
 
 ## Evidence
 
-These checks passed on 2026-10-06:
+These checks passed on 2026-10-14:
 
 | Check                                                                           | Result     | What it proves                                                 |
 | ------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------- |
@@ -74,6 +74,20 @@ These checks passed on 2026-10-06:
 The deterministic checks prove the workflow mechanics and the guardrails. They
 do not prove that every model behaves the same way on every live application.
 Do not read them as a claim of general self-healing or autonomous testing.
+
+The agent evaluations ran each task once with the skill and once without it,
+against the live QA Dashboard, on 2026-10-14 (Claude Sonnet 5.5 at `medium`
+effort as the executor, Claude Opus 5.5 as the grader):
+
+| Skill                             | Without the skill | With the skill | Sample  |
+| --------------------------------- | ----------------- | -------------- | ------- |
+| `playwright-bdd-step-implementor` | 91 / 157          | **150 / 157**  | 9 tasks |
+| `playwright-bdd-test-healer`      | 44 / 69           | **65 / 69**    | 4 tasks |
+
+The skill scores higher on every task. The samples are small, so read the
+numbers as passed checks, not as success rates. The
+[results](docs/evaluation/results.md) give each task, the limits, and how the
+skills changed after the first round.
 
 - [Run the two local workflow demos](docs/demo/README.md). They need no company
   application, account, or network.

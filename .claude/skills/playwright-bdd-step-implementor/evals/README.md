@@ -159,6 +159,29 @@ fails on it. These are scaffolding, not agent errors. Either reporting them as
 pre-existing or moving the logic into a compliant Page Object is acceptable.
 For `defect-tiles`, implementing the exact check and leaving the Scenario red is the right result.
 
+## Headless runs
+
+The 2026-10-14 round ran each executor as a headless Claude Code session
+instead of a sub-agent, because a sub-agent cannot set its effort level:
+
+```bash
+git worktree add --detach <wt> HEAD
+cp .test-data-key <wt>/.test-data-key   # git-ignored; copy only, never read it
+cd <wt> && claude -p "<executor prompt>" --model claude-sonnet-5-5 --effort medium \
+  --permission-mode auto --output-format stream-json --verbose > <run>/stream.jsonl
+```
+
+- The session ID in `stream.jsonl` names the trace under
+  `~/.claude/projects/`. Copy it to `<run>/transcript.jsonl`.
+- `auto` mode blocks a command that copies the encrypted fixture password into
+  a new file. A skill that moves the sign-in step into a Page Object needs
+  that copy, so run those cases with `--permission-mode bypassPermissions`,
+  and record the mode in `eval_metadata.json`.
+- Check `$TMPDIR` as well as `/tmp` after each run. On macOS, `$TMPDIR` is
+  under `/var/folders/`, and a check of `/tmp` alone misses those files.
+- `npx playwright trace actions` prints the value of each `fill`, so the
+  sign-in step's password appears in the trace. Tell graders never to copy it.
+
 ## Prompt templates
 
 Placeholders: `<S>` staging folder, `<name>` case, `<task>` the case's `prompt`
