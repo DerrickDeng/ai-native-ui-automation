@@ -8,7 +8,7 @@ show passed checks, not success rates.
 
 | Skill                           | Without the skill | With the skill | Sample          | Date       |
 | ------------------------------- | ----------------- | -------------- | --------------- | ---------- |
-| playwright-bdd-step-implementor | 91 / 157          | **140 / 157**  | 9 tasks × 1 run | 2026-10-14 |
+| playwright-bdd-step-implementor | 91 / 157          | **150 / 157**  | 9 tasks × 1 run | 2026-10-14 |
 | playwright-bdd-test-healer      | 36 / 69           | **55 / 69**    | 4 tasks × 1 run | 2026-10-14 |
 
 ## Setup
@@ -37,15 +37,15 @@ implements it against the live QA Dashboard
 | Task                 | Without the skill | With the skill |
 | -------------------- | ----------------- | -------------- |
 | 1 defect-tiles       | 9 / 16            | **16 / 16**    |
-| 2 defect-escape-rate | 13 / 17           | **14 / 17**    |
+| 2 defect-escape-rate | 13 / 17           | **17 / 17**    |
 | 3 filter-narrowing   | 9 / 15            | **14 / 15**    |
 | 4 section-tour       | 12 / 20           | **19 / 20**    |
-| 5 run-report-build   | 13 / 18           | **17 / 18**    |
-| 6 run-filters        | 9 / 16            | **13 / 16**    |
-| 7 tile-counts        | 11 / 19           | **18 / 19**    |
-| 8 pass-rate-check    | 7 / 19            | **17 / 19**    |
-| 9 failing-not-flaky  | 8 / 17            | **12 / 17**    |
-| **Total**            | **91 / 157**      | **140 / 157**  |
+| 5 run-report-build   | 13 / 18           | **18 / 18**    |
+| 6 run-filters        | 9 / 16            | **15 / 16**    |
+| 7 tile-counts        | 11 / 19           | **19 / 19**    |
+| 8 pass-rate-check    | 7 / 19            | **16 / 19**    |
+| 9 failing-not-flaky  | 8 / 17            | **16 / 17**    |
+| **Total**            | **91 / 157**      | **150 / 157**  |
 | Agent time, median   | 3.4 min           | 2.1 min        |
 
 How to read this:
@@ -60,9 +60,15 @@ How to read this:
 - Without the skill, the agent decrypted, or tried to decrypt, the test
   account password outside the test code in 3 tasks. With the skill, it did
   not.
-- Weak point of the skill: in task 9 the requirement note says the rule is not
-  decided. The agent loosened the check and reported a pass, instead of a red
-  check and a question for the scenario owner.
+- The skill runs here are from skill commit `776394d`. That commit added two
+  gotchas after the first round: keep a check red when the requirement is
+  undecided, and keep temporary files in the session scratchpad. In the first
+  round, task 9 scored 12 / 17, because the agent loosened the check and
+  reported a pass. With the gotchas, it kept the check red and asked the
+  scenario owner, and scored 16 / 17.
+- Remaining weak points: in task 8 the agent read the retrieval skill late and
+  added a check that the scenario does not ask for. In tasks 3 and 9 it still
+  wrote one temporary file outside the session scratchpad.
 
 ## playwright-bdd-test-healer: with and without the skill
 
